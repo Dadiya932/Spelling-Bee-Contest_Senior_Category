@@ -170,7 +170,14 @@ window.SB_AUDIO=window.SB_AUDIO||{};
 const loading={};
 function loadBundle(n){
   if(loading[n])return loading[n];
-  loading[n]=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="audio/"+n+".js";sc.onload=res;sc.onerror=()=>{delete loading[n];rej()};document.head.appendChild(sc)});
+  loading[n]=new Promise((res,rej)=>{
+    const paths=["audio/"+n+".js",n+".js"];let i=0;
+    const tryNext=()=>{
+      if(i>=paths.length){delete loading[n];rej();return}
+      const sc=document.createElement("script");sc.src=paths[i++];sc.onload=res;sc.onerror=tryNext;document.head.appendChild(sc);
+    };
+    tryNext();
+  });
   return loading[n];
 }
 const player=new Audio();player.preload="auto";
